@@ -1,0 +1,124 @@
+CREATE TABLE roles (
+    roleid INTEGER PRIMARY KEY,
+    rolename VARCHAR(50) NOT NULL,
+    permissions TEXT
+);
+
+CREATE TABLE categories (
+    categoryid INTEGER PRIMARY KEY,
+    categoryname VARCHAR(100) NOT NULL,
+    description TEXT
+);
+
+CREATE TABLE customers (
+    customerid INTEGER PRIMARY KEY,
+    firstname VARCHAR(50) NOT NULL,
+    lastname VARCHAR(50) NOT NULL,
+    passwordhash TEXT NOT NULL,
+    phone VARCHAR(20),
+    address TEXT,
+    createdat TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE orderstatus (
+    statusid INTEGER PRIMARY KEY,
+    statusname VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE reservationstatus (
+    resstatusid INTEGER PRIMARY KEY,
+    statusname VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE restauranttables (
+    tableid INTEGER PRIMARY KEY,
+    tablenumber INTEGER NOT NULL UNIQUE,
+    capacity INTEGER NOT NULL,
+    location VARCHAR(100),
+    status VARCHAR(50)
+);
+
+CREATE TABLE menuitems (
+    menuitemid INTEGER PRIMARY KEY,
+    categoryid INTEGER NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    price DECIMAL(10,2) NOT NULL,
+    isavailable BOOLEAN DEFAULT TRUE,
+    CONSTRAINT fk_menu_category FOREIGN KEY (categoryid) REFERENCES categories(categoryid)
+);
+
+CREATE TABLE employees (
+    employeeid INTEGER PRIMARY KEY,
+    roleid INTEGER NOT NULL,
+    firstname VARCHAR(50) NOT NULL,
+    lastname VARCHAR(50) NOT NULL,
+    email VARCHAR(100) UNIQUE,
+    passwordhash TEXT NOT NULL,
+    phone VARCHAR(20),
+    hiredate DATE DEFAULT CURRENT_DATE,
+    isactive BOOLEAN DEFAULT TRUE,
+    CONSTRAINT fk_employees_role FOREIGN KEY (roleid) REFERENCES roles(roleid)
+);
+
+CREATE TABLE cart (
+    cartid INTEGER PRIMARY KEY,
+    customerid INTEGER NOT NULL,
+    updatedat TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_cart_customer FOREIGN KEY (customerid) REFERENCES customers(customerid)
+);
+
+CREATE TABLE cartitems (
+    cartitemid INTEGER PRIMARY KEY,
+    cartid INTEGER NOT NULL,
+    menuitemid INTEGER NOT NULL,
+    quantity INTEGER NOT NULL CHECK (quantity > 0),
+    CONSTRAINT fk_cartitems_cart FOREIGN KEY (cartid) REFERENCES cart(cartid) ON DELETE CASCADE,
+    CONSTRAINT fk_cartitems_menuitem FOREIGN KEY (menuitemid) REFERENCES menuitems(menuitemid)
+);
+
+CREATE TABLE orders (
+    orderid INTEGER PRIMARY KEY,
+    customerid INTEGER NOT NULL,
+    statusid INTEGER NOT NULL,
+    orderdate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    totalamount DECIMAL(10,2) DEFAULT 0,
+    ordertype VARCHAR(50),
+    CONSTRAINT fk_orders_customer FOREIGN KEY (customerid) REFERENCES customers(customerid),
+    CONSTRAINT fk_orders_status FOREIGN KEY (statusid) REFERENCES orderstatus(statusid)
+);
+
+CREATE TABLE orderdetails (
+    orderdetailsid INTEGER PRIMARY KEY,
+    orderid INTEGER NOT NULL,
+    menuitemid INTEGER NOT NULL,
+    quantity INTEGER NOT NULL CHECK (quantity > 0),
+    unitprice DECIMAL(10,2) NOT NULL,
+    CONSTRAINT fk_orderdetails_menuitem FOREIGN KEY (menuitemid) REFERENCES menuitems(menuitemid),
+    CONSTRAINT fk_orderdetails_order FOREIGN KEY (orderid) REFERENCES orders(orderid) ON DELETE CASCADE
+);
+
+CREATE TABLE reservations (
+    reservationid INTEGER PRIMARY KEY,
+    customerid INTEGER NOT NULL,
+    tableid INTEGER NOT NULL,
+    resstatusid INTEGER NOT NULL,
+    reservationdate DATE NOT NULL,
+    reservationtime TIME NOT NULL,
+    guestcount INTEGER NOT NULL,
+    specialrequest TEXT,
+    CONSTRAINT fk_reservations_customer FOREIGN KEY (customerid) REFERENCES customers(customerid),
+    CONSTRAINT fk_reservations_status FOREIGN KEY (resstatusid) REFERENCES reservationstatus(resstatusid),
+    CONSTRAINT fk_reservations_table FOREIGN KEY (tableid) REFERENCES restauranttables(tableid)
+);
+
+CREATE TABLE payments (
+    paymentid INTEGER PRIMARY KEY,
+    orderid INTEGER NOT NULL,
+    paymentmethod VARCHAR(50),
+    amountpaid DECIMAL(10,2) NOT NULL,
+    taxamount DECIMAL(10,2) DEFAULT 0,
+    servicefee DECIMAL(10,2) DEFAULT 0,
+    transactiondate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_payments_order FOREIGN KEY (orderid) REFERENCES orders(orderid)
+);
