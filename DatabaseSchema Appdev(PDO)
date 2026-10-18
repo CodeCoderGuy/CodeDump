@@ -122,3 +122,5 @@ INSERT INTO greek_grocery_inventory (brand_name, product_name, category_group, p
 ('Papadopoulou', 'Digestive Biscuits Plain', 'Sweets & Confectionery', 1.60, '250g', 'Pan-Hellenic'),
 ('Ion', 'Amigdalou Milk Chocolate Almond', 'Sweets & Confectionery', 1.70, '100g', 'Attica'),
 ('Ion', 'Chocofreta Milk Chocolate Wafer', 'Sweets & Confectionery', 0.65, '38g', 'Attica'),
+('Attiki', 'Greek Thyme Honey Jar', 'Sweets & Confectionery', 6.40, '450g', 'Attica'),
+('Lacta', 'Milk Chocolate with Hazelnuts', 'Sweets & Confectionery', 1.40, '85g', 'Pan-Hellenic');
